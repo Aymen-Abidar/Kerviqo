@@ -1,0 +1,14 @@
+{
+  "name": "kerviqo-dentaire-netlify",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site de cabinet dentaire Kerviqo prêt pour Netlify + Neon",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'Static site ready'"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
