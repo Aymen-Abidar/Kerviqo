@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Réservation | Kerviqo Dentaire</title>
+  <meta name="description" content="Réservez votre séance chez Kerviqo Dentaire avec sélection simple des créneaux disponibles.">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="reservation">
+  <header class="site-header">
+    <div class="container navbar">
+      <a class="brand" href="index.html">
+        <img src="assets/images/logo-kerviqo.png" alt="Logo Kerviqo">
+        <div class="brand-text">
+          <strong>KERVIQO DENTAIRE</strong>
+          <span>Cabinet dentaire</span>
+        </div>
+      </a>
+      <button class="menu-toggle">Menu</button>
+      <nav class="nav-links">
+        <a href="index.html" data-page="home">Accueil</a>
+        <a href="services.html" data-page="services">Services</a>
+        <a href="reservation.html" data-page="reservation">Réserver</a>
+        <a href="admin.html" data-page="admin">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="badge">Réservation intelligente</span>
+        <h1 class="section-title">Réservez facilement votre séance</h1>
+        <p class="section-subtitle">Choisissez un service, un jour, puis une heure libre. Les créneaux déjà pris disparaissent automatiquement. Le cabinet travaille du lundi au vendredi de 10h00 à 18h00.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container form-shell">
+        <article class="admin-panel form-panel">
+          <h2>Vos informations</h2>
+          <p class="helper">Remplissez les champs ci-dessous puis choisissez votre date et votre heure. Les mots ont été simplifiés pour être plus faciles à comprendre.</p>
+
+          <form id="reservation-form">
+            <div class="form-grid">
+              <div class="form-group"><label for="full_name">Nom et prénom</label><input id="full_name" name="full_name" placeholder="Ex : Sara Bennani" required></div>
+              <div class="form-group"><label for="phone">Téléphone / WhatsApp</label><input id="phone" name="phone" placeholder="Ex : 06XXXXXXXX" required></div>
+              <div class="form-group"><label for="birth_date">Date de naissance</label><input id="birth_date" type="date" name="birth_date"></div>
+              <div class="form-group"><label for="city">Ville</label><input id="city" name="city" placeholder="Ex : Casablanca"></div>
+              <div class="form-group"><label for="cin">Numéro CIN</label><input id="cin" name="cin" placeholder="Ex : AB123456"></div>
+              <div class="form-group"><label for="insurance">Assurance</label><input id="insurance" name="insurance" placeholder="Ex : CNSS, CNOPS…"></div>
+              <div class="form-group"><label for="company">Entreprise</label><input id="company" name="company" placeholder="Facultatif"></div>
+              <div class="form-group"><label for="emergency_contact">Personne à prévenir</label><input id="emergency_contact" name="emergency_contact" placeholder="Nom + téléphone"></div>
+              <div class="form-group full"><label for="antecedents">Antécédents médicaux ou dentaires</label><textarea id="antecedents" name="antecedents" placeholder="Ex : diabète, traitement en cours, ancienne intervention…"></textarea></div>
+              <div class="form-group full"><label for="allergies">Allergies connues</label><textarea id="allergies" name="allergies" placeholder="Ex : pénicilline, anesthésie, latex…"></textarea></div>
+              <div class="form-group full"><label for="notes">Votre demande / note</label><textarea id="notes" name="notes" placeholder="Expliquez brièvement votre besoin ou votre douleur."></textarea></div>
+              <div class="form-group"><label for="service-select">Service souhaité</label><select name="service_id" id="service-select" required></select></div>
+              <div class="form-group"><label for="session-date">Jour souhaité</label><input type="date" name="session_date" id="session-date" required disabled></div>
+              <div class="form-group full"><label for="session-time-select">Heure disponible</label><select name="session_time" id="session-time-select" required disabled><option value="">Choisissez d’abord un service et une date</option></select><small class="field-help">La première heure libre sera sélectionnée automatiquement. Vous pouvez la changer.</small></div>
+            </div>
+
+            <input type="hidden" name="service_name" id="service-name">
+            <div id="reservation-notice" class="notice"></div>
+            <div class="inline-actions" style="margin-top:20px;">
+              <button type="submit">Confirmer la réservation</button>
+              <a class="btn secondary" href="services.html">Voir les services</a>
+            </div>
+          </form>
+        </article>
+
+        <aside class="admin-panel side-panel">
+          <h2>Disponibilités en direct</h2>
+          <p class="helper">Un seul objectif : que le patient comprenne vite. Vous choisissez le soin, le jour, puis une heure libre.</p>
+
+          <article class="selection-card" id="service-summary">
+            <h3>Résumé de votre choix</h3>
+            <div class="meta-list">
+              <div class="meta-line"><span>Service</span><strong id="summary-service">Choisissez un service</strong></div>
+              <div class="meta-line"><span>Durée prévue</span><strong id="summary-duration">—</strong></div>
+              <div class="meta-line"><span>Prix indicatif</span><strong id="summary-price">—</strong></div>
+              <div class="meta-line"><span>Jour</span><strong id="summary-date">—</strong></div>
+              <div class="meta-line"><span>Heure choisie</span><strong id="summary-time">—</strong></div>
+              <div class="meta-line"><span>Horaires cabinet</span><strong class="time-range">10:00 → 18:00</strong></div>
+            </div>
+          </article>
+
+          <div style="height:18px"></div>
+          <div id="slots-container" class="empty-state">Choisissez d’abord un service puis une date pour voir les heures disponibles.</div>
+
+          <div style="height:18px"></div>
+          <article class="soft-card">
+            <h3>Contact du cabinet</h3>
+            <div class="meta-list">
+              <div class="meta-line"><span>Téléphone / WhatsApp</span><strong data-office-phone>0679889108</strong></div>
+              <div class="meta-line"><span>Email</span><strong data-office-email>aymenabidar21@gmail.com</strong></div>
+              <div class="meta-line"><span>Instagram</span><a target="_blank" class="link-clean" data-office-instagram href="https://www.instagram.com/kerviqo/">@kerviqo</a></div>
+            </div>
+          </article>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>© 2026 Kerviqo Dentaire</span>
+      <span>Réservation prête pour Netlify + Neon</span>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    const serviceSelect = document.getElementById('service-select');
+    const sessionDateInput = document.getElementById('session-date');
+    const sessionTimeSelect = document.getElementById('session-time-select');
+    const slotsContainer = document.getElementById('slots-container');
+    const hiddenServiceName = document.getElementById('service-name');
+    const form = document.getElementById('reservation-form');
+    const summaryService = document.getElementById('summary-service');
+    const summaryDuration = document.getElementById('summary-duration');
+    const summaryPrice = document.getElementById('summary-price');
+    const summaryDate = document.getElementById('summary-date');
+    const summaryTime = document.getElementById('summary-time');
+    let currentServices = [];
+
+    function nextOpenDate() {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      while ([0, 6].includes(d.getDay())) d.setDate(d.getDate() + 1);
+      return d.toISOString().slice(0, 10);
+    }
+
+    function getSelectedService() {
+      return currentServices.find(item => String(item.id) === String(serviceSelect.value));
+    }
+
+    function syncTimeSummary() {
+      summaryDate.textContent = sessionDateInput.value || '—';
+      summaryTime.textContent = sessionTimeSelect.value ? formatTimeLabel(sessionTimeSelect.value) : '—';
+    }
+
+    function updateServiceSummary() {
+      const selected = getSelectedService();
+      if (!selected) {
+        summaryService.textContent = 'Choisissez un service';
+        summaryDuration.textContent = '—';
+        summaryPrice.textContent = '—';
+        hiddenServiceName.value = '';
+        sessionDateInput.disabled = true;
+        sessionTimeSelect.disabled = true;
+        sessionTimeSelect.innerHTML = '<option value="">Choisissez d’abord un service et une date</option>';
+        slotsContainer.innerHTML = '<div class="empty-state">Choisissez d’abord un service puis une date pour voir les heures disponibles.</div>';
+        syncTimeSummary();
+        return;
+      }
+      hiddenServiceName.value = selected.name;
+      summaryService.textContent = selected.name;
+      summaryDuration.textContent = `${selected.duration_minutes || 60} min`;
+      summaryPrice.textContent = formatPrice(selected.price || 0);
+      sessionDateInput.disabled = false;
+      syncTimeSummary();
+      if (sessionDateInput.value) loadAvailability(sessionDateInput.value);
+    }
+
+    function fillServices(services) {
+      currentServices = [...services].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      serviceSelect.innerHTML = '<option value="">Choisir un service</option>' + currentServices.map(service => `
+        <option value="${service.id}" data-slug="${service.slug}">${service.name} — ${formatPrice(service.price)}</option>
+      `).join('');
+
+      const requestedService = new URLSearchParams(window.location.search).get('service');
+      if (requestedService) {
+        const match = currentServices.find(service => service.slug === requestedService || String(service.id) === requestedService);
+        if (match) serviceSelect.value = match.id;
+      }
+      updateServiceSummary();
+    }
+
+    function selectSlot(time, updateSelectOnly = false) {
+      sessionTimeSelect.value = time || '';
+      slotsContainer.querySelectorAll('.slot-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.time === time));
+      syncTimeSummary();
+      if (!updateSelectOnly && time) showNotice('reservation-notice', `Heure choisie : ${formatTimeLabel(time)}`, 'success');
+    }
+
+    function renderHourSelect(slots) {
+      const availableSlots = slots.filter(slot => slot.available);
+      if (!availableSlots.length) {
+        sessionTimeSelect.disabled = true;
+        sessionTimeSelect.innerHTML = '<option value="">Aucune heure libre ce jour-là</option>';
+        syncTimeSummary();
+        return;
+      }
+
+      sessionTimeSelect.disabled = false;
+      sessionTimeSelect.innerHTML = availableSlots.map(slot => `
+        <option value="${formatTimeLabel(slot.time)}">${formatTimeLabel(slot.time)} → ${formatTimeLabel(slot.end_time)}</option>
+      `).join('');
+
+      selectSlot(sessionTimeSelect.value || formatTimeLabel(availableSlots[0].time), true);
+    }
+
+    async function loadAvailability(date) {
+      const selected = getSelectedService();
+      if (!selected || !date) return;
+      slotsContainer.innerHTML = 'Chargement des créneaux...';
+      sessionTimeSelect.disabled = true;
+      sessionTimeSelect.innerHTML = '<option value="">Chargement...</option>';
+      syncTimeSummary();
+
+      try {
+        const data = await api(`availability?date=${date}&serviceId=${encodeURIComponent(selected.id)}`);
+        if (data.closed) {
+          slotsContainer.innerHTML = '<div class="empty-state">Cabinet fermé ce jour-là. Choisissez un autre jour.</div>';
+          sessionTimeSelect.disabled = true;
+          sessionTimeSelect.innerHTML = '<option value="">Cabinet fermé</option>';
+          syncTimeSummary();
+          return;
+        }
+
+        const slots = data.slots || [];
+        if (!slots.length || !slots.some(slot => slot.available)) {
+          slotsContainer.innerHTML = '<div class="empty-state">Aucune heure libre pour ce service à cette date.</div>';
+          sessionTimeSelect.disabled = true;
+          sessionTimeSelect.innerHTML = '<option value="">Aucune heure libre</option>';
+          syncTimeSummary();
+          return;
+        }
+
+        renderHourSelect(slots);
+
+        slotsContainer.innerHTML = `
+          <div class="selection-card">
+            <div class="selection-row"><strong>${date}</strong><span class="helper">Durée prévue : ${data.durationMinutes || selected.duration_minutes || 60} min</span></div>
+            <div class="slot-grid">
+              ${slots.map(slot => `
+                <button type="button" class="slot-btn ${slot.available ? '' : 'disabled'}" data-time="${formatTimeLabel(slot.time)}" ${slot.available ? '' : 'disabled'}>
+                  ${formatTimeLabel(slot.time)} → ${formatTimeLabel(slot.end_time)} ${slot.available ? '' : '• Occupé'}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+
+        slotsContainer.querySelectorAll('.slot-btn').forEach(btn => {
+          if (btn.disabled) return;
+          btn.addEventListener('click', () => selectSlot(btn.dataset.time));
+        });
+
+        selectSlot(sessionTimeSelect.value, true);
+      } catch (e) {
+        slotsContainer.innerHTML = `<div class="empty-state">Impossible de charger les horaires : ${e.message}</div>`;
+        sessionTimeSelect.disabled = true;
+        sessionTimeSelect.innerHTML = '<option value="">Impossible de charger</option>';
+        syncTimeSummary();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      sessionDateInput.min = nextOpenDate();
+      const services = await loadCollection('services', fallbackServices);
+      fillServices(services);
+    });
+
+    serviceSelect.addEventListener('change', () => {
+      sessionDateInput.value = '';
+      sessionTimeSelect.value = '';
+      updateServiceSummary();
+      showNotice('reservation-notice', 'Service choisi. Sélectionnez maintenant le jour souhaité.', 'success');
+    });
+
+    sessionDateInput.addEventListener('change', () => {
+      syncTimeSummary();
+      loadAvailability(sessionDateInput.value);
+    });
+
+    sessionTimeSelect.addEventListener('change', () => selectSlot(sessionTimeSelect.value, true));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = Object.fromEntries(new FormData(form).entries());
+      if (!payload.service_name) return showNotice('reservation-notice', 'Choisissez un service.', 'error');
+      if (!payload.session_time) return showNotice('reservation-notice', 'Choisissez une heure disponible.', 'error');
+      try {
+        const result = await api('reservations', { method: 'POST', body: JSON.stringify(payload) });
+        const message = result?.localMode
+          ? 'Réservation enregistrée en mode secours dans ce navigateur. Branchez l’API pour la sauvegarde serveur.'
+          : 'Réservation enregistrée avec succès.';
+        showNotice('reservation-notice', message, 'success');
+        form.reset();
+        hiddenServiceName.value = '';
+        sessionDateInput.disabled = true;
+        sessionTimeSelect.disabled = true;
+        sessionTimeSelect.innerHTML = '<option value="">Choisissez d’abord un service et une date</option>';
+        slotsContainer.innerHTML = '<div class="empty-state">Choisissez d’abord un service puis une date pour voir les heures disponibles.</div>';
+        updateServiceSummary();
+      } catch (err) {
+        showNotice('reservation-notice', err.message, 'error');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560">
+    <defs>
+      <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0%" stop-color="#0c1424"/>
+        <stop offset="100%" stop-color="#17283b"/>
+      </linearGradient>
+    </defs>
+    <rect width="800" height="560" rx="38" fill="url(#g1)"/>
+    <circle cx="660" cy="120" r="120" fill="#d4af37" opacity=".15"/>
+    <circle cx="120" cy="470" r="140" fill="#ffffff" opacity=".05"/>
+    <rect x="88" y="86" width="624" height="388" rx="30" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.08)"/>
+    <rect x="125" y="132" width="250" height="220" rx="24" fill="rgba(255,255,255,.06)"/>
+    <rect x="410" y="132" width="180" height="40" rx="20" fill="rgba(212,175,55,.18)"/>
+    <rect x="410" y="194" width="240" height="28" rx="14" fill="rgba(255,255,255,.08)"/>
+    <rect x="410" y="240" width="210" height="28" rx="14" fill="rgba(255,255,255,.08)"/>
+    <rect x="410" y="286" width="170" height="28" rx="14" fill="rgba(255,255,255,.08)"/>
+    <rect x="125" y="386" width="526" height="44" rx="22" fill="rgba(255,255,255,.06)"/>
+    <text x="400" y="495" text-anchor="middle" fill="#fff7d0" font-size="34" font-family="Arial, Helvetica, sans-serif" font-weight="700">Accueil du cabinet</text>
+    <text x="400" y="530" text-anchor="middle" fill="#b7c3d1" font-size="20" font-family="Arial, Helvetica, sans-serif">Réception claire • et haut de gamme</text>
+    </svg>
