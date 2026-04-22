@@ -284,10 +284,7 @@
       if (!payload.session_time) return showNotice('reservation-notice', 'Choisissez une heure disponible.', 'error');
       try {
         const result = await api('reservations', { method: 'POST', body: JSON.stringify(payload) });
-        const message = result?.localMode
-          ? 'Réservation enregistrée en mode secours dans ce navigateur. Branchez l’API pour la sauvegarde serveur.'
-          : 'Réservation enregistrée avec succès.';
-        showNotice('reservation-notice', message, 'success');
+        showNotice('reservation-notice', 'Réservation enregistrée avec succès.', 'success');
         form.reset();
         hiddenServiceName.value = '';
         sessionDateInput.disabled = true;

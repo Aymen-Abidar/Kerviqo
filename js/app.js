@@ -686,7 +686,14 @@ async function localApi(path, options = {}) {
 
 function shouldFallbackToLocal(path, response, dataOrError) {
   const { endpoint } = parsePath(path);
-  const supported = ['admin-login', 'office', 'services', 'gallery', 'reviews', 'availability', 'reservations'];
+
+  // Never store booking logic locally, otherwise reservations made on one device
+  // will not appear on another device.
+  if (['admin-login', 'availability', 'reservations'].includes(endpoint)) {
+    return false;
+  }
+
+  const supported = ['office', 'services', 'gallery', 'reviews'];
   if (!supported.includes(endpoint)) return false;
   if (!response) return true;
   if ([401, 403, 409].includes(response.status)) return false;
