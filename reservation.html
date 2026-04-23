@@ -123,19 +123,19 @@
     const summaryDate = document.getElementById('summary-date');
     const summaryTime = document.getElementById('summary-time');
     let currentServices = [];
-    const PHONE_REGEX = /^(0\d{9}|\+212\d{9})$/;
+    const RESERVATION_PHONE_REGEX = /^(0\d{9}|\+212\d{9})$/;
 
-    function normalizePhone(value = '') {
+    function normalizeReservationPhone(value = '') {
       return String(value || '').trim().replace(/[\s.-]+/g, '');
     }
 
     function validateReservationForm(payload) {
       const fullName = String(payload.full_name || '').trim();
-      const phone = normalizePhone(payload.phone || '');
+      const phone = normalizeReservationPhone(payload.phone || '');
       if (!fullName) return 'Veuillez renseigner votre nom complet.';
       if (fullName.length < 3) return 'Le nom complet doit contenir au moins 3 caractères.';
       if (!phone) return 'Veuillez renseigner votre téléphone.';
-      if (!PHONE_REGEX.test(phone)) return 'Le téléphone doit être au format 0123456789 ou +212123456789.';
+      if (!RESERVATION_PHONE_REGEX.test(phone)) return 'Le téléphone doit être au format 0123456789 ou +212123456789.';
       payload.full_name = fullName;
       payload.phone = phone;
       return '';
@@ -187,7 +187,7 @@
         serviceSelect.disabled = true;
         serviceSelect.innerHTML = '<option value="">Aucun service disponible pour le moment</option>';
         updateServiceSummary();
-        showNotice('reservation-notice', 'Aucun service n'a été chargé. Vérifiez la connexion ou la liste des services.', 'error');
+        showNotice('reservation-notice', "Aucun service n’a été chargé. Vérifiez la connexion ou la liste des services.", 'error');
         return;
       }
 
@@ -317,7 +317,7 @@
     sessionTimeSelect.addEventListener('change', () => selectSlot(sessionTimeSelect.value, true));
 
     document.getElementById('phone').addEventListener('blur', () => {
-      const normalized = normalizePhone(document.getElementById('phone').value);
+      const normalized = normalizeReservationPhone(document.getElementById('phone').value);
       document.getElementById('phone').value = normalized;
     });
 
