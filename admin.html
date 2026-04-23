@@ -40,7 +40,7 @@
       <div class="container">
         <div class="admin-panel admin-login" id="login-panel">
           <h2>Connexion administrateur</h2>
-          <p class="helper">Le mot de passe principal vient de la variable d’environnement <strong>ADMIN_PASSWORD</strong> sur Netlify.</p>
+          <p class="helper">Entrez le mot de passe du docteur. Pour plus de sécurité, la connexion est demandée à chaque ouverture de la page.</p>
           <form id="login-form">
             <div class="form-group">
               <label for="admin-password">Mot de passe</label>
@@ -332,7 +332,7 @@
           <input type="hidden" name="id" value="${escapeHtml(item.id)}">
           <div class="form-grid">
             <div class="form-group"><label>Nom</label><input name="full_name" value="${escapeHtml(item.full_name || '')}" required></div>
-            <div class="form-group"><label>Téléphone</label><input name="phone" value="${escapeHtml(item.phone || '')}" required></div>
+            <div class="form-group"><label>Téléphone</label><input name="phone" value="${escapeHtml(item.phone || '')}" required inputmode="tel" pattern="^(0\d{9}|\+212\d{9})$" title="Utilisez 0123456789 ou +212123456789"></div>
             <div class="form-group"><label>Service</label><select name="service_id">${serviceOptions(item.service_id)}</select></div>
             <div class="form-group"><label>Date</label><input name="session_date" type="date" value="${escapeHtml(item.session_date || '')}" required></div>
             <div class="form-group"><label>Heure</label><input type="time" name="session_time" value="${formatTimeLabel(item.session_time)}" required></div>
@@ -533,8 +533,10 @@
     document.addEventListener('kerviqo-local-mode', refreshModeBanner);
 
     document.addEventListener('DOMContentLoaded', async () => {
+      clearToken();
+      document.getElementById('login-panel').style.display = 'block';
+      document.getElementById('admin-app').style.display = 'none';
       bindImageHelpers();
-      await tryAutoLogin();
 
       document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
 

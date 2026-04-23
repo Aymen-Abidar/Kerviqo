@@ -174,8 +174,13 @@ tr:hover td { background: rgba(255,255,255,.02); }
 }
 @media (max-width: 760px) {
   .menu-toggle { display:block; background: rgba(255,255,255,.05); color: var(--text); box-shadow:none; border:1px solid var(--line); }
-  .navbar { align-items:flex-start; }
-  .nav-links { display:none; flex-direction:column; align-items:stretch; width:100%; padding-top:10px; }
+  .navbar { align-items:flex-start; gap: 12px; }
+  .brand { width: calc(100% - 110px); }
+  .brand img { width: 54px; height: 40px; }
+  .brand-text strong { font-size: 1rem; }
+  .brand-text span { font-size: .85rem; }
+  .nav-links { display:none; flex-direction:column; align-items:stretch; width:100%; padding-top:10px; gap: 8px; }
+  .nav-links a { display:block; text-align:center; }
   .nav-links.open { display:flex; }
   .hero-stats, .form-grid, .slot-grid { grid-template-columns: 1fr; }
   .section { padding: 72px 0; }
@@ -200,7 +205,7 @@ tr:hover td { background: rgba(255,255,255,.02); }
 .field-help {
   display: block;
   margin-top: 8px;
-  color: var(--text-muted);
+  color: var(--muted);
   font-size: 0.92rem;
 }
 

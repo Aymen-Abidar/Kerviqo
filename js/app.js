@@ -219,6 +219,17 @@ function normalizeBoolean(value) {
   return value === true || value === 'true' || value === 1 || value === '1';
 }
 
+const PHONE_REGEX = /^(0\d{9}|\+212\d{9})$/;
+
+function normalizePhone(value = '') {
+  return String(value || '').trim().replace(/[\s.-]+/g, '');
+}
+
+function isValidPhone(value = '') {
+  return PHONE_REGEX.test(normalizePhone(value));
+}
+
+
 function timeToMinutes(time) {
   const [h, m] = String(time).slice(0, 5).split(':').map(Number);
   return h * 60 + m;
@@ -331,12 +342,14 @@ function setImagePreview(previewElement, value, fallback = 'Aucune image sélect
 }
 
 function getToken() {
-  return localStorage.getItem('kerviqo_admin_token');
+  return sessionStorage.getItem('kerviqo_admin_token') || null;
 }
 function setToken(token) {
-  localStorage.setItem('kerviqo_admin_token', token);
+  sessionStorage.setItem('kerviqo_admin_token', token);
+  localStorage.removeItem('kerviqo_admin_token');
 }
 function clearToken() {
+  sessionStorage.removeItem('kerviqo_admin_token');
   localStorage.removeItem('kerviqo_admin_token');
 }
 
@@ -437,8 +450,10 @@ function validateReservationPayloadLocal(body, store, reservationId = null) {
   const dayEnd = office.dayEnd || '18:00';
   const defaultDuration = normalizeNumber(office.slotMinutes, 60);
 
-  if (!body.full_name?.trim()) throw new Error('Veuillez renseigner le nom du patient.');
+  if (!body.full_name?.trim()) throw new Error('Veuillez renseigner le nom complet.');
+  if (String(body.full_name || '').trim().length < 3) throw new Error('Le nom complet doit contenir au moins 3 caractères.');
   if (!body.phone?.trim()) throw new Error('Veuillez renseigner le téléphone.');
+  if (!isValidPhone(body.phone)) throw new Error('Le numéro doit être au format 0123456789 ou +212123456789.');
   if (!body.session_date) throw new Error('Veuillez choisir une date.');
   if (!body.session_time) throw new Error('Veuillez choisir une heure.');
   if (!isOpenDay(body.session_date, workDays)) throw new Error('Le cabinet est fermé ce jour-là.');
@@ -468,7 +483,7 @@ function validateReservationPayloadLocal(body, store, reservationId = null) {
     ...body,
     id: body.id || makeId('reservation'),
     full_name: String(body.full_name).trim(),
-    phone: String(body.phone).trim(),
+    phone: normalizePhone(body.phone),
     birth_date: body.birth_date || null,
     city: body.city || null,
     cin: body.cin || null,

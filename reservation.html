@@ -44,19 +44,19 @@
 
           <form id="reservation-form">
             <div class="form-grid">
-              <div class="form-group"><label for="full_name">Nom et prénom</label><input id="full_name" name="full_name" placeholder="Ex : Sara Bennani" required></div>
-              <div class="form-group"><label for="phone">Téléphone / WhatsApp</label><input id="phone" name="phone" placeholder="Ex : 06XXXXXXXX" required></div>
+              <div class="form-group"><label for="full_name">Nom complet *</label><input id="full_name" name="full_name" placeholder="Ex : Sara Bennani" required minlength="3" autocomplete="name"></div>
+              <div class="form-group"><label for="phone">Téléphone *</label><input id="phone" name="phone" placeholder="Ex : 0612345678 ou +212612345678" required inputmode="tel" autocomplete="tel" pattern="^(0\d{9}|\+212\d{9})$" title="Utilisez 0123456789 ou +212123456789"><small class="field-help">Formats acceptés : 0123456789 ou +212123456789</small></div>
               <div class="form-group"><label for="birth_date">Date de naissance</label><input id="birth_date" type="date" name="birth_date"></div>
               <div class="form-group"><label for="city">Ville</label><input id="city" name="city" placeholder="Ex : Casablanca"></div>
               <div class="form-group"><label for="cin">Numéro CIN</label><input id="cin" name="cin" placeholder="Ex : AB123456"></div>
               <div class="form-group"><label for="insurance">Assurance</label><input id="insurance" name="insurance" placeholder="Ex : CNSS, CNOPS…"></div>
-              <div class="form-group"><label for="company">Entreprise</label><input id="company" name="company" placeholder="Facultatif"></div>
-              <div class="form-group"><label for="emergency_contact">Personne à prévenir</label><input id="emergency_contact" name="emergency_contact" placeholder="Nom + téléphone"></div>
-              <div class="form-group full"><label for="antecedents">Antécédents médicaux ou dentaires</label><textarea id="antecedents" name="antecedents" placeholder="Ex : diabète, traitement en cours, ancienne intervention…"></textarea></div>
-              <div class="form-group full"><label for="allergies">Allergies connues</label><textarea id="allergies" name="allergies" placeholder="Ex : pénicilline, anesthésie, latex…"></textarea></div>
-              <div class="form-group full"><label for="notes">Votre demande / note</label><textarea id="notes" name="notes" placeholder="Expliquez brièvement votre besoin ou votre douleur."></textarea></div>
-              <div class="form-group"><label for="service-select">Service souhaité</label><select name="service_id" id="service-select" required></select></div>
-              <div class="form-group"><label for="session-date">Jour souhaité</label><input type="date" name="session_date" id="session-date" required disabled></div>
+              <div class="form-group"><label for="company">Société</label><input id="company" name="company" placeholder="Facultatif"></div>
+              <div class="form-group"><label for="emergency_contact">Contact d’urgence</label><input id="emergency_contact" name="emergency_contact" placeholder="Nom + téléphone"></div>
+              <div class="form-group full"><label for="antecedents">Antécédents</label><textarea id="antecedents" name="antecedents" placeholder="Ex : diabète, traitement en cours, ancienne intervention…"></textarea></div>
+              <div class="form-group full"><label for="allergies">Allergies</label><textarea id="allergies" name="allergies" placeholder="Ex : pénicilline, anesthésie, latex…"></textarea></div>
+              <div class="form-group full"><label for="notes">Votre message</label><textarea id="notes" name="notes" placeholder="Expliquez brièvement votre besoin ou votre douleur."></textarea></div>
+              <div class="form-group"><label for="service-select">Service</label><select name="service_id" id="service-select" required></select></div>
+              <div class="form-group"><label for="session-date">Date</label><input type="date" name="session_date" id="session-date" required disabled></div>
               <div class="form-group full"><label for="session-time-select">Heure disponible</label><select name="session_time" id="session-time-select" required disabled><option value="">Choisissez d’abord un service et une date</option></select><small class="field-help">La première heure libre sera sélectionnée automatiquement. Vous pouvez la changer.</small></div>
             </div>
 
@@ -123,6 +123,23 @@
     const summaryDate = document.getElementById('summary-date');
     const summaryTime = document.getElementById('summary-time');
     let currentServices = [];
+    const PHONE_REGEX = /^(0\d{9}|\+212\d{9})$/;
+
+    function normalizePhone(value = '') {
+      return String(value || '').trim().replace(/[\s.-]+/g, '');
+    }
+
+    function validateReservationForm(payload) {
+      const fullName = String(payload.full_name || '').trim();
+      const phone = normalizePhone(payload.phone || '');
+      if (!fullName) return 'Veuillez renseigner votre nom complet.';
+      if (fullName.length < 3) return 'Le nom complet doit contenir au moins 3 caractères.';
+      if (!phone) return 'Veuillez renseigner votre téléphone.';
+      if (!PHONE_REGEX.test(phone)) return 'Le téléphone doit être au format 0123456789 ou +212123456789.';
+      payload.full_name = fullName;
+      payload.phone = phone;
+      return '';
+    }
 
     function nextOpenDate() {
       const d = new Date();
@@ -277,9 +294,16 @@
 
     sessionTimeSelect.addEventListener('change', () => selectSlot(sessionTimeSelect.value, true));
 
+    document.getElementById('phone').addEventListener('blur', () => {
+      const normalized = normalizePhone(document.getElementById('phone').value);
+      document.getElementById('phone').value = normalized;
+    });
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const payload = Object.fromEntries(new FormData(form).entries());
+      const validationError = validateReservationForm(payload);
+      if (validationError) return showNotice('reservation-notice', validationError, 'error');
       if (!payload.service_name) return showNotice('reservation-notice', 'Choisissez un service.', 'error');
       if (!payload.session_time) return showNotice('reservation-notice', 'Choisissez une heure disponible.', 'error');
       try {

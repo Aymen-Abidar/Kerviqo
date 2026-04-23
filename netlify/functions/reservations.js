@@ -23,6 +23,23 @@ function overlaps(startA, endA, startB, endB) {
   return startA < endB && endA > startB;
 }
 
+const PHONE_REGEX = /^(0\d{9}|\+212\d{9})$/;
+
+function normalizePhone(value = '') {
+  return String(value || '').trim().replace(/[\s.-]+/g, '');
+}
+
+function assertReservationIdentity(body) {
+  const fullName = String(body.full_name || '').trim();
+  const phone = normalizePhone(body.phone || '');
+  if (!fullName) throw new Error('Nom complet requis.');
+  if (fullName.length < 3) throw new Error('Le nom complet doit contenir au moins 3 caractères.');
+  if (!phone) throw new Error('Téléphone requis.');
+  if (!PHONE_REGEX.test(phone)) throw new Error('Le téléphone doit être au format 0123456789 ou +212123456789.');
+  return { fullName, phone };
+}
+
+
 async function getOfficeSettings() {
   const settingsRows = await query`SELECT value FROM settings WHERE key='office' LIMIT 1`;
   return settingsRows[0]?.value || {};
@@ -64,6 +81,7 @@ async function normalizeReservationPayload(body, reservationId = null) {
   const dayStart = office.dayStart || '10:00';
   const dayEnd = office.dayEnd || '18:00';
   const fallbackDuration = Number(office.slotMinutes || 60);
+  const { fullName, phone } = assertReservationIdentity(body);
 
   if (!body.session_date) throw new Error('Date de séance requise.');
   if (!body.session_time) throw new Error('Heure de séance requise.');
@@ -90,6 +108,8 @@ async function normalizeReservationPayload(body, reservationId = null) {
 
   return {
     ...body,
+    full_name: fullName,
+    phone,
     service_id: serviceMeta.service_id || null,
     service_name: serviceMeta.service_name || body.service_name,
     duration_minutes: durationMinutes,
