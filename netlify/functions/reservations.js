@@ -125,7 +125,29 @@ exports.handler = async (event) => {
       const auth = requireAdmin(event);
       if (!auth.authorized) return auth.response;
       const rows = await query`
-        SELECT r.*, s.name AS service_label
+        SELECT
+          r.id,
+          r.full_name,
+          r.phone,
+          r.birth_date::text AS birth_date,
+          r.city,
+          r.cin,
+          r.insurance,
+          r.company,
+          r.emergency_contact,
+          r.antecedents,
+          r.allergies,
+          r.notes,
+          r.service_id::text AS service_id,
+          r.service_name,
+          r.session_date::text AS session_date,
+          r.session_time::text AS session_time,
+          r.session_end_time::text AS session_end_time,
+          r.duration_minutes,
+          r.status,
+          r.created_at::text AS created_at,
+          r.updated_at::text AS updated_at,
+          s.name AS service_label
         FROM reservations r
         LEFT JOIN services s ON s.id = r.service_id
         ORDER BY r.session_date ASC, r.session_time ASC

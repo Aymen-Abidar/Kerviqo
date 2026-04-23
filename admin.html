@@ -246,6 +246,27 @@
       return JSON.parse(decodeURIComponent(value));
     }
 
+    function normalizeDateOnly(value) {
+      if (!value) return '';
+      return String(value).slice(0, 10);
+    }
+
+    function normalizeTimeOnly(value) {
+      return formatTimeLabel(String(value || '').slice(0, 8));
+    }
+
+    function normalizeReservationItem(item) {
+      const start = normalizeTimeOnly(item.session_time);
+      const end = normalizeTimeOnly(item.session_end_time);
+      return {
+        ...item,
+        session_date: normalizeDateOnly(item.session_date),
+        birth_date: normalizeDateOnly(item.birth_date),
+        session_time: start ? `${start}:00` : item.session_time,
+        session_end_time: end ? `${end}:00` : item.session_end_time
+      };
+    }
+
     function refreshModeBanner() {
       const banner = document.getElementById('mode-banner');
       banner.style.display = window.__kerviqoLocalMode ? 'block' : 'none';
@@ -255,7 +276,7 @@
       const today = new Date().toISOString().slice(0, 10);
       const html = [
         ['Réservations', state.reservations.length],
-        ['Aujourd’hui', state.reservations.filter(r => r.session_date === today && r.status !== 'cancelled').length],
+        ['Aujourd’hui', state.reservations.filter(r => normalizeDateOnly(r.session_date) === today && r.status !== 'cancelled').length],
         ['Services', state.services.length],
         ['Avis', state.reviews.length]
       ].map(([label, value]) => `<div class="kpi-card"><span>${label}</span><strong>${value}</strong></div>`).join('');
@@ -280,10 +301,13 @@
       const cards = await Promise.all(dates.map(async date => {
         try {
           const data = await api(`availability?date=${date}`);
-          const reserved = state.reservations.filter(r => r.session_date === date && r.status !== 'cancelled');
+          const reserved = state.reservations.filter(r => normalizeDateOnly(r.session_date) === date && r.status !== 'cancelled');
           const lines = (data.slots || []).map(slot => {
-            const match = reserved.find(r => String(r.session_time).slice(0, 5) === formatTimeLabel(slot.time));
-            return `<div class="slot-line"><span>${formatTimeLabel(slot.time)}</span><strong>${match ? escapeHtml(match.full_name) : 'Libre'}</strong></div>`;
+            const slotStart = timeToMinutes(slot.time);
+            const slotEnd = timeToMinutes(slot.end_time);
+            const match = reserved.find(r => overlaps(slotStart, slotEnd, timeToMinutes(r.session_time), timeToMinutes(r.session_end_time)));
+            const label = match ? escapeHtml(match.full_name) : (slot.available ? 'Libre' : 'Occupé');
+            return `<div class="slot-line"><span>${formatTimeLabel(slot.time)}</span><strong>${label}</strong></div>`;
           }).join('');
           return `<article class="day-card"><h4>${date}</h4>${lines || '<div class="helper">Aucun créneau</div>'}</article>`;
         } catch {
@@ -477,7 +501,7 @@
       state.gallery = await api('gallery');
       state.reviews = await api('reviews');
       state.office = { ...fallbackOffice, ...(await api('office')) };
-      state.reservations = await api('reservations', { token });
+      state.reservations = (await api('reservations', { token })).map(normalizeReservationItem);
       fillKPIs();
       renderReservations();
       renderServices();
@@ -489,6 +513,27 @@
         if (settingsForm.elements[key]) settingsForm.elements[key].value = Array.isArray(value) ? value.join(',') : value;
       });
       refreshModeBanner();
+    }
+
+    let dashboardRefreshTimer = null;
+
+    function startDashboardAutoRefresh() {
+      stopDashboardAutoRefresh();
+      dashboardRefreshTimer = setInterval(async () => {
+        if (document.hidden || !getToken()) return;
+        try {
+          await loadAdminData();
+        } catch (error) {
+          console.error('Auto refresh failed', error);
+        }
+      }, 20000);
+    }
+
+    function stopDashboardAutoRefresh() {
+      if (dashboardRefreshTimer) {
+        clearInterval(dashboardRefreshTimer);
+        dashboardRefreshTimer = null;
+      }
     }
 
     async function tryAutoLogin() {
@@ -548,12 +593,13 @@
           document.getElementById('login-panel').style.display = 'none';
           document.getElementById('admin-app').style.display = 'block';
           await loadAdminData();
+          startDashboardAutoRefresh();
         } catch (err) {
           showNotice('login-notice', err.message, 'error');
         }
       });
 
-      document.getElementById('logout-btn').addEventListener('click', () => { clearToken(); location.reload(); });
+      document.getElementById('logout-btn').addEventListener('click', () => { stopDashboardAutoRefresh(); clearToken(); location.reload(); });
 
       document.getElementById('service-form').addEventListener('submit', async e => {
         e.preventDefault();
@@ -631,6 +677,17 @@
           showNotice('settings-notice', err.message, 'error');
         }
       });
+
+      document.addEventListener('visibilitychange', async () => {
+        if (document.hidden || !getToken()) return;
+        try {
+          await loadAdminData();
+        } catch (error) {
+          console.error('Visibility refresh failed', error);
+        }
+      });
+
+      await tryAutoLogin();
     });
   </script>
 </body>
