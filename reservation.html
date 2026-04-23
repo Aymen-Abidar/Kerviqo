@@ -55,7 +55,7 @@
               <div class="form-group full"><label for="antecedents">Antécédents</label><textarea id="antecedents" name="antecedents" placeholder="Ex : diabète, traitement en cours, ancienne intervention…"></textarea></div>
               <div class="form-group full"><label for="allergies">Allergies</label><textarea id="allergies" name="allergies" placeholder="Ex : pénicilline, anesthésie, latex…"></textarea></div>
               <div class="form-group full"><label for="notes">Votre message</label><textarea id="notes" name="notes" placeholder="Expliquez brièvement votre besoin ou votre douleur."></textarea></div>
-              <div class="form-group"><label for="service-select">Service</label><select name="service_id" id="service-select" required></select></div>
+              <div class="form-group"><label for="service-select">Service</label><div class="select-wrap"><select name="service_id" id="service-select" required disabled><option value="">Chargement des services...</option></select></div><small class="field-help">Touchez ici pour ouvrir la liste des services.</small></div>
               <div class="form-group"><label for="session-date">Date</label><input type="date" name="session_date" id="session-date" required disabled></div>
               <div class="form-group full"><label for="session-time-select">Heure disponible</label><select name="session_time" id="session-time-select" required disabled><option value="">Choisissez d’abord un service et une date</option></select><small class="field-help">La première heure libre sera sélectionnée automatiquement. Vous pouvez la changer.</small></div>
             </div>
@@ -181,15 +181,25 @@
     }
 
     function fillServices(services) {
-      currentServices = [...services].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-      serviceSelect.innerHTML = '<option value="">Choisir un service</option>' + currentServices.map(service => `
+      currentServices = [...(services || [])].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
+      if (!currentServices.length) {
+        serviceSelect.disabled = true;
+        serviceSelect.innerHTML = '<option value="">Aucun service disponible pour le moment</option>';
+        updateServiceSummary();
+        showNotice('reservation-notice', 'Aucun service n'a été chargé. Vérifiez la connexion ou la liste des services.', 'error');
+        return;
+      }
+
+      serviceSelect.disabled = false;
+      serviceSelect.innerHTML = '<option value="">Choisissez un service</option>' + currentServices.map(service => `
         <option value="${service.id}" data-slug="${service.slug}">${service.name} — ${formatPrice(service.price)}</option>
       `).join('');
 
       const requestedService = new URLSearchParams(window.location.search).get('service');
       if (requestedService) {
         const match = currentServices.find(service => service.slug === requestedService || String(service.id) === requestedService);
-        if (match) serviceSelect.value = match.id;
+        if (match) serviceSelect.value = String(match.id);
       }
       updateServiceSummary();
     }
@@ -276,14 +286,26 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       sessionDateInput.min = nextOpenDate();
-      const services = await loadCollection('services', fallbackServices);
-      fillServices(services);
+      serviceSelect.disabled = true;
+      serviceSelect.innerHTML = '<option value="">Chargement des services...</option>';
+      try {
+        const services = await loadCollection('services', fallbackServices);
+        fillServices(services);
+      } catch (error) {
+        serviceSelect.disabled = true;
+        serviceSelect.innerHTML = '<option value="">Impossible de charger les services</option>';
+        showNotice('reservation-notice', `Impossible de charger les services : ${error.message}`, 'error');
+      }
     });
 
     serviceSelect.addEventListener('change', () => {
       sessionDateInput.value = '';
       sessionTimeSelect.value = '';
       updateServiceSummary();
+      if (!serviceSelect.value) {
+        showNotice('reservation-notice', 'Choisissez un service dans la liste.', 'error');
+        return;
+      }
       showNotice('reservation-notice', 'Service choisi. Sélectionnez maintenant le jour souhaité.', 'success');
     });
 
